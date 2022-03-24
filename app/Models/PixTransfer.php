@@ -9,6 +9,10 @@ class PixTransfer extends Model
 {
     use HasFactory;
 
+    protected $attributes = [
+        'description' => '',
+    ];
+
     protected $fillable = [
         'user_id',
         'key',

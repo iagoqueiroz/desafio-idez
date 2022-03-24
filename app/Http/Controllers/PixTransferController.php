@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\StorePixTransferRequest;
-use App\Http\Requests\UpdatePixTransferRequest;
 use App\Models\PixTransfer;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
+use App\Http\Requests\StorePixTransferRequest;
+use Symfony\Component\HttpFoundation\JsonResponse;
 
 class PixTransferController extends Controller
 {
@@ -13,7 +15,9 @@ class PixTransferController extends Controller
      */
     public function index()
     {
-        //
+        $pixTransfers = PixTransfer::where('user_id', Auth::id())->get();
+
+        return new JsonResponse($pixTransfers);
     }
 
     /**
@@ -23,7 +27,14 @@ class PixTransferController extends Controller
      */
     public function store(StorePixTransferRequest $request)
     {
-        //
+        $validated = $request->validated();
+
+        $pixTransfer = PixTransfer::create([
+            ...$validated,
+            'user_id' => Auth::id()
+        ]);
+
+        return new JsonResponse($pixTransfer, 201);
     }
 
     /**
@@ -33,7 +44,13 @@ class PixTransferController extends Controller
      */
     public function show(PixTransfer $pixTransfer)
     {
-        //
+        $response = Gate::inspect('show', $pixTransfer);
+
+        if ($response->allowed()) {
+            return new JsonResponse($pixTransfer);
+        }
+
+        return new JsonResponse(['message' => 'Not found'], 404);
     }
 
     /**
